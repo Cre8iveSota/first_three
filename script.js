@@ -1,4 +1,27 @@
 import * as THREE from "three";
+import gsap from "gsap";
+import GUI from "lil-gui";
+
+// Create a GUI
+const gui = new GUI({
+  width: 300,
+  title: "Three.js Debugging",
+  closeFolders: false,
+});
+// gui.close();
+// gui.hide();
+
+window.addEventListener("keydown", (event) => {
+  if (event.key == "h") {
+    if (gui._closed) {
+      gui.show();
+    } else {
+      gui.hide();
+    }
+  }
+});
+
+const debugObject = {};
 
 // Createb a canvas element
 const canvas = document.querySelector("canvas.webgl");
@@ -14,6 +37,10 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 camera.position.z = 5;
+
+gui.add(camera.position, "x", -10, 10, 0.01).name("Camera X");
+gui.add(camera.position, "y", -10, 10, 0.01).name("Camera Y");
+gui.add(camera.position, "z", -10, 10, 0.01).name("Camera Z");
 
 const sizes = {
   width: window.innerWidth,
@@ -84,7 +111,34 @@ const material = new THREE.MeshBasicMaterial({
   wireframe: true,
 });
 const cube = new THREE.Mesh(geometry, material);
+const cubeTweaks = gui.addFolder("Cube Tweaks");
 scene.add(cube);
+
+cubeTweaks.add(cube, "visible").name("Toggle Cube Visibility");
+cubeTweaks.add(material, "wireframe").name("Toggle Wireframe");
+cubeTweaks.addColor(material, "color").name("Cube Color");
+
+debugObject.spin = () => {
+  gsap.to(cube.rotation, {
+    duration: 1,
+    y: cube.rotation.y + Math.PI * 2,
+    ease: "power1.inOut",
+  });
+};
+
+cubeTweaks.add(debugObject, "spin").name("Spin Cube");
+
+debugObject.subdivision = 2;
+cubeTweaks
+  .add(debugObject, "subdivision", 0, 5, 1)
+  .name("Subdivision")
+  .onFinishChange((value) => {
+    cube.geometry.dispose(); // Dispose of the old geometry
+    cube = new THREE.BoxGeometry(1, 1, 1, value, value, value);
+    cube.setAttribute("position", positionsAttribute);
+    cube.geometry.dispose(); // Dispose of the old geometry
+    cube.geometry = newGeometry; // Assign the new geometry
+  });
 
 // Animation loop
 function animate() {
