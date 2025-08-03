@@ -59,9 +59,30 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-// Create a cube
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+// Create a Object
+// const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
+
+const geometry = new THREE.BufferGeometry();
+const count = 200;
+const positionsArray = new Float32Array(count * 3); // 3 values per vertex (x, y, z)
+
+for (let i = 0; i < count * 3 * 3; i++) {
+  positionsArray[i] = (Math.random() - 0.5) * 4; // Random values between -0.5 and 0.5
+}
+
+const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3); // 3 values per vertex (x, y, z)
+
+// const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0]); // x y z,  x y z, x y z
+
+// const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3); // meaning 1 vertex has 3 values (x, y, z
+
+// const geometry = new THREE.BufferGeometry();
+geometry.setAttribute("position", positionsAttribute); // position is meaning the shader will use this attribute to render the object
+
+const material = new THREE.MeshBasicMaterial({
+  color: 0x00ff00,
+  wireframe: true,
+});
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
